@@ -1,6 +1,14 @@
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
 const ProductCard = ({ title, price, oldPrice, image, isNew, isSale }) => {
   const handleInquiry = () => {
-    // For now, we'll just use a placeholder URL. We'll update this when we create the contact page
     const contactUrl = `/contact?product=${encodeURIComponent(title)}`;
     window.location.href = contactUrl;
   };
@@ -30,9 +38,9 @@ const ProductCard = ({ title, price, oldPrice, image, isNew, isSale }) => {
         <h3 className="mb-2 text-lg font-medium text-gray-900">{title}</h3>
         <div className="mt-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-gray-900">${price}</span>
+            <span className="text-xl font-bold text-gray-900">{formatPrice(price)}</span>
             {oldPrice && (
-              <span className="text-sm text-gray-500 line-through">${oldPrice}</span>
+              <span className="text-sm text-gray-500 line-through">{formatPrice(oldPrice)}</span>
             )}
           </div>
           <button

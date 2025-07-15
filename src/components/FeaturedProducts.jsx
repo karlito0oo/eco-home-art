@@ -1,5 +1,6 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
+import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
 
 // Import Swiper styles
@@ -11,37 +12,37 @@ const products = [
   {
     id: 1,
     title: 'Library Stool',
-    price: 250,
-    oldPrice: 300,
+    price: 12500,
+    oldPrice: 15000,
     isNew: true,
     image: 'https://placehold.co/600x600/e2e8f0/94a3b8?text=Library+Stool'
   },
   {
     id: 2,
     title: 'Library Stool Chair',
-    price: 250,
+    price: 12500,
     isSale: true,
     image: 'https://placehold.co/600x600/fce7f3/db2777?text=Library+Stool+Chair'
   },
   {
     id: 3,
     title: 'Library Stool Chair',
-    price: 250,
+    price: 12500,
     image: 'https://placehold.co/600x600/f0fdf4/16a34a?text=Library+Stool+Chair'
   },
   {
     id: 4,
     title: 'Eco Lounge Chair',
-    price: 350,
+    price: 17500,
     isNew: true,
     image: 'https://placehold.co/600x600/eff6ff/2563eb?text=Eco+Lounge+Chair'
   },
   {
     id: 5,
     title: 'Bamboo Side Table',
-    price: 150,
+    price: 7500,
     isSale: true,
-    oldPrice: 200,
+    oldPrice: 10000,
     image: 'https://placehold.co/600x600/fdf4ff/a21caf?text=Bamboo+Side+Table'
   }
 ];
@@ -61,17 +62,14 @@ const FeaturedProducts = () => {
           navigation
           pagination={{ clickable: true }}
           breakpoints={{
-            // Mobile
             640: {
               slidesPerView: 2,
               spaceBetween: 20,
             },
-            // Tablet
             768: {
               slidesPerView: 2,
               spaceBetween: 24,
             },
-            // Desktop
             1024: {
               slidesPerView: 3,
               spaceBetween: 32,
@@ -85,6 +83,15 @@ const FeaturedProducts = () => {
             </SwiperSlide>
           ))}
         </Swiper>
+
+        <div className="mt-12 text-center">
+          <Link
+            to="/products"
+            className="inline-block rounded-full bg-teal-600 px-8 py-3 text-lg font-semibold text-white transition-all hover:bg-teal-700 hover:shadow-lg"
+          >
+            Browse More Products
+          </Link>
+        </div>
       </div>
     </section>
   );
