@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 const formatPrice = (price) => {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
@@ -7,14 +9,19 @@ const formatPrice = (price) => {
   }).format(price);
 };
 
-const ProductCard = ({ title, price, oldPrice, image, isNew, isSale }) => {
+const ProductCard = ({ id, title, price, oldPrice, image, isNew, isSale }) => {
+  const navigate = useNavigate();
+
   const handleInquiry = () => {
-    const contactUrl = `/contact?product=${encodeURIComponent(title)}`;
-    window.location.href = contactUrl;
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    navigate(`/products/${id}/${slug}`);
   };
 
   return (
-    <div className="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-[1.02]">
+    <div 
+      className="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-[1.02] cursor-pointer"
+      onClick={handleInquiry}
+    >
       {/* Badge */}
       {(isNew || isSale) && (
         <span className={`absolute left-4 top-4 rounded-full px-3 py-1 text-sm font-semibold text-white ${
@@ -44,9 +51,12 @@ const ProductCard = ({ title, price, oldPrice, image, isNew, isSale }) => {
             )}
           </div>
           <button
-            onClick={handleInquiry}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleInquiry();
+            }}
             className="rounded-full bg-teal-600 p-2 text-white transition-colors hover:bg-teal-700"
-            aria-label={`Inquire about ${title}`}
+            aria-label={`View details for ${title}`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
