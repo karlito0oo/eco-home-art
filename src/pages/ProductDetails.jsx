@@ -82,11 +82,13 @@ const ProductDetails = () => {
             className="w-full rounded-lg overflow-hidden"
           >
             <SwiperSlide>
-              <img
-                src={`/public/${product.img_url}`}
-                alt={product.name}
-                className="w-full h-[400px] object-cover"
-              />
+              <div className="aspect-square w-full">
+                <img
+                  src={`/${product.img_url}`}
+                  alt={product.name}
+                  className="w-full h-full object-contain bg-gray-50"
+                />
+              </div>
             </SwiperSlide>
           </Swiper>
         </div>
@@ -122,41 +124,49 @@ const ProductDetails = () => {
       {similarProducts.length > 0 && (
         <div className="mt-16">
           <h3 className="text-2xl font-semibold mb-8">MORE {product.categories}</h3>
-          <Swiper
-            modules={[Navigation, Pagination]}
-            spaceBetween={20}
-            slidesPerView={1}
-            navigation
-            pagination={{ clickable: true }}
-            breakpoints={{
-              640: { slidesPerView: 2 },
-              768: { slidesPerView: 3 },
-              1024: { slidesPerView: 4 }
-            }}
-            className="similar-products-swiper"
-          >
-            {similarProducts.map((item) => (
-              <SwiperSlide key={item.id}>
-                <div 
-                  className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer"
-                  onClick={() => {
-                    const itemSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                    navigate(`/products/${item.id}/${itemSlug}`);
-                  }}
-                >
-                  <img
-                    src={`/public/${item.img_url}`}
-                    alt={item.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h4 className="font-semibold text-lg mb-2">{item.name}</h4>
-                    <p className="text-green-800 font-medium">{item.categories}</p>
+          <div className="px-8 py-4">
+            <Swiper
+              modules={[Navigation, Pagination]}
+              spaceBetween={24}
+              slidesPerView={1}
+              navigation
+              pagination={{ 
+                clickable: true,
+                el: '.similar-products-pagination'
+              }}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 }
+              }}
+              className="similar-products-swiper !pb-12"
+            >
+              {similarProducts.map((item) => (
+                <SwiperSlide key={item.id}>
+                  <div 
+                    className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer h-[400px] flex flex-col"
+                    onClick={() => {
+                      const itemSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                      navigate(`/products/${item.id}/${itemSlug}`);
+                    }}
+                  >
+                    <div className="h-[250px] w-full">
+                      <img
+                        src={`/${item.img_url}`}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <h4 className="font-semibold text-lg line-clamp-2">{item.name}</h4>
+                      <p className="text-green-800 font-medium">{item.categories}</p>
+                    </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+            <div className="similar-products-pagination flex justify-center mt-6" />
+          </div>
         </div>
       )}
     </div>
