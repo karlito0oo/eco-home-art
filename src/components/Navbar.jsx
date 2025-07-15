@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { CATEGORY_LIST } from '../../constants';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [showProductsDropdown, setShowProductsDropdown] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,9 +18,19 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleCategoryClick = (category) => {
+    navigate(`/products?category=${encodeURIComponent(category)}`);
+    setShowProductsDropdown(false);
+    setIsOpen(false);
+  };
+
   const navItems = [
     { name: 'HOME', path: '/' },
-    { name: 'PRODUCTS', path: '/products' },
+    { 
+      name: 'PRODUCTS', 
+      path: '/products',
+      hasDropdown: true 
+    },
     { name: 'CONTACT US', path: '/contact' }
   ];
 
@@ -30,18 +43,57 @@ const Navbar = () => {
           {/* Left side - Navigation Links */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`px-4 py-2 text-sm font-medium tracking-wider transition-all duration-300 relative group ${
-                  location.pathname === item.path ? 'text-green-800' : 'text-gray-700 hover:text-green-800'
-                }`}
-              >
-                {item.name}
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-green-800 transition-all duration-300 ${
-                  location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'
-                }`} />
-              </Link>
+              <div key={item.name} className="relative group">
+                {item.hasDropdown ? (
+                  <div className="relative">
+                    <button
+                      className={`px-4 py-2 text-sm font-medium tracking-wider transition-all duration-300 relative group ${
+                        location.pathname === item.path ? 'text-green-800' : 'text-gray-700 hover:text-green-800'
+                      }`}
+                    >
+                      {item.name}
+                      <span className={`absolute bottom-0 left-0 h-0.5 bg-green-800 transition-all duration-300 ${
+                        location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`} />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    <div 
+                      className="absolute top-full left-0 mt-1 py-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
+                    >
+                      <Link
+                        to="/products"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-800"
+                        onClick={() => setShowProductsDropdown(false)}
+                      >
+                        ALL PRODUCTS
+                      </Link>
+                      <div className="h-px bg-gray-100 my-1"></div>
+                      {CATEGORY_LIST.map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => handleCategoryClick(category)}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-800"
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`px-4 py-2 text-sm font-medium tracking-wider transition-all duration-300 relative group ${
+                      location.pathname === item.path ? 'text-green-800' : 'text-gray-700 hover:text-green-800'
+                    }`}
+                  >
+                    {item.name}
+                    <span className={`absolute bottom-0 left-0 h-0.5 bg-green-800 transition-all duration-300 ${
+                      location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`} />
+                  </Link>
+                )}
+              </div>
             ))}
           </div>
 
@@ -144,18 +196,39 @@ const Navbar = () => {
 
             {/* Mobile Navigation Links */}
             {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`block px-4 py-3 text-sm font-medium tracking-wider hover:bg-gray-50 border-l-4 transition-all duration-300 ${
-                  location.pathname === item.path 
-                    ? 'text-green-800 border-green-800 bg-gray-50'
-                    : 'text-gray-700 border-transparent hover:text-green-800 hover:border-green-800'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.name}
-              </Link>
+              <div key={item.name}>
+                <Link
+                  to={item.path}
+                  className={`block px-4 py-3 text-sm font-medium tracking-wider hover:bg-gray-50 border-l-4 transition-all duration-300 ${
+                    location.pathname === item.path 
+                      ? 'text-green-800 border-green-800 bg-gray-50'
+                      : 'text-gray-700 border-transparent hover:text-green-800 hover:border-green-800'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.name}
+                </Link>
+                {item.hasDropdown && (
+                  <div className="pl-8 py-2 space-y-1 bg-gray-50">
+                    <Link
+                      to="/products"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:text-green-800"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      ALL PRODUCTS
+                    </Link>
+                    {CATEGORY_LIST.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => handleCategoryClick(category)}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:text-green-800"
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
