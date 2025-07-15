@@ -1,15 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency: 'PHP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
-const ProductCard = ({ id, title, price, oldPrice, image, isNew, isSale }) => {
+const ProductCard = ({ id, title, image, dimensions, description, category }) => {
   const navigate = useNavigate();
 
   const handleInquiry = () => {
@@ -26,19 +17,10 @@ const ProductCard = ({ id, title, price, oldPrice, image, isNew, isSale }) => {
       className="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-transform hover:scale-[1.02] cursor-pointer"
       onClick={handleCardClick}
     >
-      {/* Badge */}
-      {(isNew || isSale) && (
-        <span className={`absolute left-4 top-4 rounded-full px-3 py-1 text-sm font-semibold text-white ${
-          isNew ? 'bg-green-800' : 'bg-rose-400'
-        }`}>
-          {isNew ? 'New' : 'Sales'}
-        </span>
-      )}
-
       {/* Image */}
       <div className="aspect-square overflow-hidden">
         <img
-          src={image || 'https://placehold.co/600x600/e2e8f0/94a3b8?text=Product+Image'}
+          src={image}
           alt={title}
           className="h-full w-full object-cover transition-transform hover:scale-105"
         />
@@ -47,19 +29,23 @@ const ProductCard = ({ id, title, price, oldPrice, image, isNew, isSale }) => {
       {/* Content */}
       <div className="flex flex-1 flex-col p-4">
         <h3 className="mb-2 text-lg font-medium text-gray-900">{title}</h3>
+        
+        {dimensions && (
+          <p className="text-sm text-gray-600 mb-2">
+            <span className="font-medium">Dimensions:</span> {dimensions}
+          </p>
+        )}
+        
+        <p className="text-sm text-gray-600 line-clamp-2 mb-4">{description}</p>
+        
         <div className="mt-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-gray-900">{formatPrice(price)}</span>
-            {oldPrice && (
-              <span className="text-sm text-gray-500 line-through">{formatPrice(oldPrice)}</span>
-            )}
-          </div>
+          <span className="text-sm font-medium text-gray-600">{category}</span>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleInquiry();
             }}
-            className="rounded-full bg-green-800 p-2 text-white transition-colors hover:bg-teal-700"
+            className="rounded-full bg-green-800 p-2 text-white transition-colors hover:bg-green-700"
             aria-label={`Inquire about ${title}`}
           >
             <svg

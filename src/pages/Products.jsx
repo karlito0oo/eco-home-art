@@ -1,62 +1,31 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import { PRODUCT_LIST, CATEGORY_LIST } from '../../constants';
 
-// Temporary categories until we get the data from the PDF
-const categories = [
-  'All',
-  'Living Room',
-  'Dining Room',
-  'Bedroom',
-  'Outdoor',
-  'Lighting',
-  'Accessories'
-];
+// Add 'All' to the categories list
+const categories = ['All', ...CATEGORY_LIST];
 
 const Products = () => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const location = useLocation();
+  const [selectedCategory, setSelectedCategory] = useState(location.state?.selectedCategory || 'All');
+  const [filteredProducts, setFilteredProducts] = useState(PRODUCT_LIST);
+  const [loading, setLoading] = useState(false);
 
+  // Update selected category when location state changes
   useEffect(() => {
-    // This will be replaced with actual data fetching from your backend
-    const fetchProducts = async () => {
-      try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // This is temporary data. Replace with actual data from your backend
-        const data = [
-          {
-            id: 1,
-            title: 'Library Stool',
-            price: 12500,
-            category: 'Living Room',
-            isNew: true,
-            image: 'https://placehold.co/600x600/e2e8f0/94a3b8?text=Library+Stool'
-          },
-          // Add more products here
-        ];
-        
-        setProducts(data);
-        setFilteredProducts(data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+    if (location.state?.selectedCategory) {
+      setSelectedCategory(location.state.selectedCategory);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (selectedCategory === 'All') {
-      setFilteredProducts(products);
+      setFilteredProducts(PRODUCT_LIST);
     } else {
-      setFilteredProducts(products.filter(product => product.category === selectedCategory));
+      setFilteredProducts(PRODUCT_LIST.filter(product => product.categories === selectedCategory));
     }
-  }, [selectedCategory, products]);
+  }, [selectedCategory]);
 
   return (
     <div className="min-h-screen bg-white py-12" style={{paddingTop: "120px"}}>
@@ -94,8 +63,16 @@ const Products = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map(product => (
-              <ProductCard key={product.id} {...product} />
+            {filteredProducts.map((product) => (
+              <ProductCard 
+                key={product.id}
+                id={product.id}
+                title={product.name}
+                image={`/public/${product.img_url}`}
+                dimensions={product.dimensions}
+                description={product.description}
+                category={product.categories}
+              />
             ))}
           </div>
         )}
