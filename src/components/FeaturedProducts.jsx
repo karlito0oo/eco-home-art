@@ -87,7 +87,7 @@ const FeaturedProducts = () => {
         <div className="mt-12 text-center">
           <Link
             to="/products"
-            className="inline-block rounded-full bg-teal-600 px-8 py-3 text-lg font-semibold text-white transition-all hover:bg-teal-700 hover:shadow-lg"
+            className="inline-block rounded-full bg-green-800 px-8 py-3 text-lg font-semibold text-white transition-all hover:bg-teal-700 hover:shadow-lg"
           >
             Browse More Products
           </Link>

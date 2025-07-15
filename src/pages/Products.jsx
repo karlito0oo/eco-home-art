@@ -65,7 +65,7 @@ const Products = () => {
         <div className="mb-16 text-center">
           <h1 className="relative mx-auto inline-block text-4xl font-bold tracking-wider text-gray-900 md:text-5xl">
             OUR PRODUCTS
-            <div className="absolute -bottom-4 left-0 right-0 mx-auto h-1 w-32 bg-teal-600"></div>
+            <div className="absolute -bottom-4 left-0 right-0 mx-auto h-1 w-32 bg-green-800"></div>
           </h1>
         </div>
 
@@ -78,7 +78,7 @@ const Products = () => {
                 onClick={() => setSelectedCategory(category)}
                 className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? 'bg-teal-600 text-white'
+                    ? 'bg-green-800 text-white'
                     : 'bg-white text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -90,7 +90,7 @@ const Products = () => {
 
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-600 border-t-transparent"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-800 border-t-transparent"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

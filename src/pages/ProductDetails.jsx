@@ -64,8 +64,7 @@ const ProductDetails = () => {
   }, [id, slug, product.name, navigate]);
 
   const handleInquiry = () => {
-    // Handle inquiry logic here
-    console.log('Inquiry about:', product.name);
+    navigate(`/contact?product=${encodeURIComponent(product.name)}`);
   };
 
   return (
@@ -117,7 +116,7 @@ const ProductDetails = () => {
 
           <button
             onClick={handleInquiry}
-            className="w-full bg-teal-600 text-white px-6 py-3 rounded hover:bg-teal-700 transition-colors flex items-center justify-center"
+            className="w-full bg-green-800 text-white px-6 py-3 rounded hover:bg-teal-700 transition-colors flex items-center justify-center"
           >
             <span>Inquire about this product</span>
           </button>
@@ -150,7 +149,7 @@ const ProductDetails = () => {
                 />
                 <div className="p-4">
                   <h4 className="font-semibold text-lg mb-2">{item.name}</h4>
-                  <p className="text-teal-600 font-bold">₱{item.price}</p>
+                  <p className="text-green-800 font-bold">₱{item.price}</p>
                 </div>
               </div>
             </SwiperSlide>

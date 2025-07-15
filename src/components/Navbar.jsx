@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,6 +15,12 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navItems = [
+    { name: 'HOME', path: '/' },
+    { name: 'PRODUCTS', path: '/products' },
+    { name: 'CONTACT US', path: '/contact' }
+  ];
+
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-lg' : 'bg-white'
@@ -21,26 +29,30 @@ const Navbar = () => {
         <div className="flex justify-between h-20 items-center">
           {/* Left side - Navigation Links */}
           <div className="hidden md:flex items-center space-x-2">
-            {['HOME', 'PRODUCTS', 'CONTACT US'].map((item) => (
-              <a
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="px-4 py-2 text-sm font-medium tracking-wider text-gray-700 hover:text-primary transition-all duration-300 relative group"
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`px-4 py-2 text-sm font-medium tracking-wider transition-all duration-300 relative group ${
+                  location.pathname === item.path ? 'text-green-800' : 'text-gray-700 hover:text-green-800'
+                }`}
               >
-                {item}
-                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-primary group-hover:w-full group-hover:left-0 transition-all duration-300" />
-              </a>
+                {item.name}
+                <span className={`absolute bottom-0 left-0 h-0.5 bg-green-800 transition-all duration-300 ${
+                  location.pathname === item.path ? 'w-full' : 'w-0 group-hover:w-full'
+                }`} />
+              </Link>
             ))}
           </div>
 
           {/* Center - Logo */}
-          <div className="flex-shrink-0 flex items-center transform hover:scale-105 transition-transform duration-300">
+          <Link to="/" className="flex-shrink-0 flex items-center transform hover:scale-105 transition-transform duration-300">
             <img
               className="h-12 w-auto"
               src="/eco-logo.png"
               alt="Eco Logo"
             />
-          </div>
+          </Link>
 
           {/* Right side - Search (hidden on mobile) */}
           <div className="hidden md:flex flex-1 justify-end md:w-64 md:max-w-xs">
@@ -55,7 +67,7 @@ const Navbar = () => {
                   onBlur={() => setSearchFocused(false)}
                   className={`w-full pl-10 pr-4 py-2.5 border-b-2 transition-all duration-300 bg-transparent
                     ${searchFocused 
-                      ? 'border-primary' 
+                      ? 'border-green-800' 
                       : 'border-gray-200 hover:border-gray-300'
                     }
                     focus:outline-none text-gray-700`}
@@ -63,7 +75,7 @@ const Navbar = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg 
                     className={`h-5 w-5 transition-colors duration-300 ${
-                      searchFocused ? 'text-primary' : 'text-gray-400'
+                      searchFocused ? 'text-green-800' : 'text-gray-400'
                     }`} 
                     fill="none" 
                     strokeLinecap="round" 
@@ -88,9 +100,9 @@ const Navbar = () => {
             >
               <div className="relative flex overflow-hidden items-center justify-center w-[30px] h-[20px]">
                 <div className={`flex flex-col justify-between w-[20px] h-[20px] transform transition-all duration-300 origin-center overflow-hidden ${isOpen ? 'translate-x-2' : ''}`}>
-                  <div className={`bg-gray-700 h-[2px] w-7 transform transition-all duration-300 origin-left ${isOpen ? 'rotate-[42deg] translate-y-[2px] w-4 bg-primary' : ''}`}></div>
+                  <div className={`bg-gray-700 h-[2px] w-7 transform transition-all duration-300 origin-left ${isOpen ? 'rotate-[42deg] translate-y-[2px] w-4 bg-green-800' : ''}`}></div>
                   <div className={`bg-gray-700 h-[2px] w-7 rounded transform transition-all duration-300 ${isOpen ? 'translate-x-10' : ''}`}></div>
-                  <div className={`bg-gray-700 h-[2px] w-7 transform transition-all duration-300 origin-left ${isOpen ? '-rotate-[42deg] -translate-y-[2px] w-4 bg-primary' : ''}`}></div>
+                  <div className={`bg-gray-700 h-[2px] w-7 transform transition-all duration-300 origin-left ${isOpen ? '-rotate-[42deg] -translate-y-[2px] w-4 bg-green-800' : ''}`}></div>
                 </div>
               </div>
             </button>
@@ -112,7 +124,7 @@ const Navbar = () => {
                 <input
                   type="search"
                   placeholder="Search..."
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-100 focus:border-primary focus:bg-white transition-all duration-300 focus:outline-none rounded-md"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-100 focus:border-green-800 focus:bg-white transition-all duration-300 focus:outline-none rounded-md"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg 
@@ -131,14 +143,19 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Navigation Links */}
-            {['HOME', 'PRODUCTS', 'CONTACT US'].map((item) => (
-              <a
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="block px-4 py-3 text-sm font-medium tracking-wider text-gray-700 hover:text-primary hover:bg-gray-50 border-l-4 border-transparent hover:border-primary transition-all duration-300"
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`block px-4 py-3 text-sm font-medium tracking-wider hover:bg-gray-50 border-l-4 transition-all duration-300 ${
+                  location.pathname === item.path 
+                    ? 'text-green-800 border-green-800 bg-gray-50'
+                    : 'text-gray-700 border-transparent hover:text-green-800 hover:border-green-800'
+                }`}
+                onClick={() => setIsOpen(false)}
               >
-                {item}
-              </a>
+                {item.name}
+              </Link>
             ))}
           </div>
         </div>
