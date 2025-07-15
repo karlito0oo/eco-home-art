@@ -1,31 +1,44 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { PRODUCT_LIST, CATEGORY_LIST } from '../../constants';
 
-// Add 'All' to the categories list
-const categories = ['All', ...CATEGORY_LIST];
+// Add 'ALL' to the categories list
+const categories = ['ALL', ...CATEGORY_LIST];
 
 const Products = () => {
-  const location = useLocation();
-  const [selectedCategory, setSelectedCategory] = useState(location.state?.selectedCategory || 'All');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category')?.toUpperCase() || 'ALL');
   const [filteredProducts, setFilteredProducts] = useState(PRODUCT_LIST);
   const [loading, setLoading] = useState(false);
 
-  // Update selected category when location state changes
+  // Update selected category when URL parameter changes
   useEffect(() => {
-    if (location.state?.selectedCategory) {
-      setSelectedCategory(location.state.selectedCategory);
+    const categoryParam = searchParams.get('category')?.toUpperCase();
+    if (categoryParam && categories.includes(categoryParam)) {
+      setSelectedCategory(categoryParam);
+    } else {
+      setSelectedCategory('ALL');
     }
-  }, [location.state]);
+  }, [searchParams]);
 
   useEffect(() => {
-    if (selectedCategory === 'All') {
+    if (selectedCategory === 'ALL') {
       setFilteredProducts(PRODUCT_LIST);
     } else {
       setFilteredProducts(PRODUCT_LIST.filter(product => product.categories === selectedCategory));
     }
   }, [selectedCategory]);
+
+  const handleCategoryChange = (category) => {
+    if (category === 'ALL') {
+      // Remove category parameter if 'ALL' is selected
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', category);
+    }
+    setSearchParams(searchParams);
+  };
 
   return (
     <div className="min-h-screen bg-white py-12" style={{paddingTop: "120px"}}>
@@ -44,7 +57,7 @@ const Products = () => {
             {categories.map(category => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => handleCategoryChange(category)}
                 className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
                   selectedCategory === category
                     ? 'bg-green-800 text-white'
@@ -68,7 +81,7 @@ const Products = () => {
                 key={product.id}
                 id={product.id}
                 title={product.name}
-                image={`/public/${product.img_url}`}
+                image={product.img_url}
                 dimensions={product.dimensions}
                 description={product.description}
                 category={product.categories}

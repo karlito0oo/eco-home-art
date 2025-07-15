@@ -37,8 +37,8 @@ const ProductDetails = () => {
   );
 
   const handleCategoryClick = (category) => {
-    // Navigate to products page and set the selected category
-    navigate('/products', { state: { selectedCategory: category } });
+    // Navigate to products page with category as URL parameter
+    navigate(`/products?category=${encodeURIComponent(category)}`);
   };
 
   if (!product) {
