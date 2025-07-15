@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const Hero = () => {
   const [currentImage, setCurrentImage] = useState(0);
-  const images = ['/hero1.jpg', '/hero2.jpg', '/hero3.png'];
+  const images = ['/hero1.jpg', '/hero2.jpg'];
 
   useEffect(() => {
     const timer = setInterval(() => {
