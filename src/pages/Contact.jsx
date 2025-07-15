@@ -37,7 +37,7 @@ Message: ${formData.message}
   };
 
   return (
-    <div className="container mx-auto px-4" style={{paddingTop: "120px"}}>
+    <div className="container mx-auto px-4 pb-10" style={{paddingTop: "120px"}}>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           {/* Contact Information */}
