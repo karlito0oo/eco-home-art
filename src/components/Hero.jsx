@@ -49,8 +49,15 @@ const Hero = () => {
         <p className="mb-8 max-w-2xl text-lg md:text-xl">
           Transform your space with our eco-friendly furniture, lighting, and accessories
         </p>
+        
         <button className="rounded-full bg-green-800 px-8 py-3 text-lg font-semibold transition-all hover:bg-green-700 hover:shadow-lg">
-          Explore Collection
+        <a 
+          href="https://alphadds.com" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+        >
+          by: Alpha Distinct Development Solutions Inc.
+        </a>
         </button>
 
         {/* Slide Indicators */}
