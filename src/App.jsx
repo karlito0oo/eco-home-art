@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
 import FeaturedProducts from './components/FeaturedProducts';
+import Testimonials from './components/Testimonials';
 import AboutNoel from './components/AboutNoel';
 import Products from './pages/Products';
 import Contact from './pages/Contact';
@@ -23,6 +24,7 @@ function App() {
                 <Hero />
                 <AboutNoel />
                 <FeaturedProducts />
+                <Testimonials />
               </>
             } />
             <Route path="/products" element={<Products />} />
