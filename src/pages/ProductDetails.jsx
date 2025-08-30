@@ -67,26 +67,22 @@ const ProductDetails = () => {
       </nav>
 
       {/* Product Header */}
-      <h1 className="text-3xl md:text-4xl text-center font-semibold mb-8">
-        PRODUCT DETAIL
-      </h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="flex flex-col md:flex-row gap-12 items-start bg-white rounded-2xl shadow-xl p-8 mb-12 animate-fade-in">
         {/* Product Images */}
-        <div className="relative">
+        <div className="w-full md:w-1/2 relative">
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={10}
             navigation
             pagination={{ clickable: true }}
-            className="w-full rounded-lg overflow-hidden"
+            className="w-full rounded-xl overflow-hidden shadow-lg"
           >
             <SwiperSlide>
-              <div className="aspect-square w-full">
+              <div className="aspect-square w-full bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
                 <img
                   src={`/${product.img_url}`}
                   alt={product.name}
-                  className="w-full h-full object-contain bg-gray-50"
+                  className="w-4/5 h-4/5 object-contain rounded-xl shadow-lg transition-transform duration-300 hover:scale-105"
                 />
               </div>
             </SwiperSlide>
@@ -94,26 +90,23 @@ const ProductDetails = () => {
         </div>
 
         {/* Product Info */}
-        <div className="space-y-6">
-          <h2 className="text-4xl font-bold">{product.name}</h2>
-          <div className="text-xl font-medium text-gray-600">{product.categories}</div>
-          
-          <div className="space-y-4">
-            <div className="prose max-w-none">
-              <p className="text-gray-600 whitespace-pre-line">{product.description}</p>
+        <div className="w-full md:w-1/2 space-y-6 flex flex-col justify-between h-full">
+          <div>
+            <h2 className="text-4xl font-extrabold text-green-900 mb-2">{product.name}</h2>
+            <div className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-semibold text-base mb-4 shadow">{product.categories}</div>
+            <div className="prose max-w-none text-lg text-gray-700 mb-6">
+              <p className="whitespace-pre-line">{product.description}</p>
             </div>
-            
             {product.dimensions && (
               <div className="space-y-2">
-                <h3 className="font-semibold text-xl">Dimensions:</h3>
+                <h3 className="font-semibold text-xl text-green-800">Dimensions:</h3>
                 <p className="text-gray-600">{product.dimensions}</p>
               </div>
             )}
           </div>
-
           <button
             onClick={handleInquiry}
-            className="w-full bg-green-800 text-white px-6 py-3 rounded hover:bg-green-700 transition-colors flex items-center justify-center"
+            className="w-full bg-gradient-to-r from-green-700 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-green-800 hover:to-blue-700 transition-colors flex items-center justify-center font-bold text-lg shadow-lg mt-6"
           >
             <span>Inquire about this product</span>
           </button>
@@ -122,18 +115,15 @@ const ProductDetails = () => {
 
       {/* Similar Products */}
       {similarProducts.length > 0 && (
-        <div className="mt-16">
-          <h3 className="text-2xl font-semibold mb-8">MORE {product.categories}</h3>
-          <div className="px-8 py-4">
+        <div className="mt-20">
+          <h3 className="text-2xl font-extrabold mb-8 text-green-900 tracking-wide">More {product.categories}</h3>
+          <div className="px-2 py-4">
             <Swiper
               modules={[Navigation, Pagination]}
               spaceBetween={24}
               slidesPerView={1}
               navigation
-              pagination={{ 
-                clickable: true,
-                el: '.similar-products-pagination'
-              }}
+              pagination={{ clickable: true, el: '.similar-products-pagination' }}
               breakpoints={{
                 640: { slidesPerView: 2 },
                 768: { slidesPerView: 3 },
@@ -144,22 +134,22 @@ const ProductDetails = () => {
               {similarProducts.map((item) => (
                 <SwiperSlide key={item.id}>
                   <div 
-                    className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer h-[400px] flex flex-col"
+                    className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-lg overflow-hidden cursor-pointer h-[400px] flex flex-col transition-transform duration-300 hover:scale-105"
                     onClick={() => {
                       const itemSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
                       navigate(`/products/${item.id}/${itemSlug}`);
                     }}
                   >
-                    <div className="h-[250px] w-full">
+                    <div className="h-[250px] w-full flex items-center justify-center bg-white">
                       <img
                         src={`/${item.img_url}`}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        className="w-4/5 h-4/5 object-cover rounded-xl shadow"
                       />
                     </div>
                     <div className="p-4 flex-1 flex flex-col justify-between">
-                      <h4 className="font-semibold text-lg line-clamp-2">{item.name}</h4>
-                      <p className="text-green-800 font-medium">{item.categories}</p>
+                      <h4 className="font-semibold text-lg line-clamp-2 text-green-900">{item.name}</h4>
+                      <p className="text-green-700 font-medium">{item.categories}</p>
                     </div>
                   </div>
                 </SwiperSlide>
