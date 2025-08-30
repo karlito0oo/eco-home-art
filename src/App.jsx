@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Admin from './pages/Admin';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
@@ -26,6 +28,8 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id/:slug" element={<ProductDetails />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
         <Footer />
