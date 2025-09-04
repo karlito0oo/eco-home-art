@@ -49,8 +49,8 @@ class ArticleController extends Controller
             if ($request->hasFile('img')) {
                 $mainImage = $request->file('img');
                 $mainImageName = time() . '_' . $mainImage->getClientOriginalName();
-                $mainImage->move(public_path('articles'), $mainImageName);
-                $validatedData['img_url'] = 'articles/' . $mainImageName;
+                $path = $mainImage->storeAs('articles', $mainImageName, 'public');
+                $validatedData['img_url'] = $path;
             }
 
             $article = Article::create($validatedData);
@@ -84,14 +84,14 @@ class ArticleController extends Controller
             ]);
 
             if ($request->hasFile('img')) {
-                if ($article->img_url && file_exists(public_path($article->img_url))) {
-                    unlink(public_path($article->img_url));
+                if ($article->img_url) {
+                    \Storage::disk('public')->delete($article->img_url);
                 }
 
                 $mainImage = $request->file('img');
                 $mainImageName = time() . '_' . $mainImage->getClientOriginalName();
-                $mainImage->move(public_path('articles'), $mainImageName);
-                $validatedData['img_url'] = 'articles/' . $mainImageName;
+                $path = $mainImage->storeAs('articles', $mainImageName, 'public');
+                $validatedData['img_url'] = $path;
             }
 
             $article->update($validatedData);

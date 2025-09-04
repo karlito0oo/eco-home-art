@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+backend/public/products/*
+backend/public/articles/*
+backend/public/testimonials/*
+backend/storage/*

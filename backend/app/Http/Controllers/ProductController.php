@@ -113,8 +113,8 @@ class ProductController extends Controller
             if ($request->hasFile("img")) {
                 $mainImage = $request->file("img");
                 $mainImageName = time() . "_" . $mainImage->getClientOriginalName();
-                $mainImage->move(public_path("products"), $mainImageName);
-                $validatedData["img_url"] = "products/" . $mainImageName;
+                $path = $mainImage->storeAs('products', $mainImageName, 'public');
+                $validatedData["img_url"] = $path;
             }
 
             $product = Product::create($validatedData);
@@ -122,7 +122,7 @@ class ProductController extends Controller
             if ($request->hasFile("additional_images")) {
                 foreach ($request->file("additional_images") as $index => $image) {
                     $imageName = time() . "_" . $index . "_" . $image->getClientOriginalName();
-                    $image->move(public_path("products"), $imageName);
+                    $path = $image->storeAs('products', $imageName, 'public');
                     
                     ProductImage::create([
                         "product_id" => $product->id,
@@ -175,29 +175,29 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile("img")) {
-                if ($product->img_url && file_exists(public_path($product->img_url))) {
-                    unlink(public_path($product->img_url));
+                if ($product->img_url) {
+                    \Storage::disk('public')->delete($product->img_url);
                 }
 
                 $mainImage = $request->file("img");
                 $mainImageName = time() . "_" . $mainImage->getClientOriginalName();
-                $mainImage->move(public_path("products"), $mainImageName);
-                $validatedData["img_url"] = "products/" . $mainImageName;
+                $path = $mainImage->storeAs('products', $mainImageName, 'public');
+                $validatedData["img_url"] = $path;
             }
 
             $product->update($validatedData);
 
             if ($request->hasFile("additional_images")) {
                 foreach ($product->images as $image) {
-                    if (file_exists(public_path($image->image_url))) {
-                        unlink(public_path($image->image_url));
+                    if ($image->image_url) {
+                        \Storage::disk('public')->delete($image->image_url);
                     }
                     $image->delete();
                 }
 
                 foreach ($request->file("additional_images") as $index => $image) {
                     $imageName = time() . "_" . $index . "_" . $image->getClientOriginalName();
-                    $image->move(public_path("products"), $imageName);
+                    $path = $image->storeAs('products', $imageName, 'public');
                     
                     ProductImage::create([
                         "product_id" => $product->id,

@@ -1,5 +1,5 @@
-//const BASE_URL = "http://localhost:8000/api";
-const BASE_URL = "https://api-noeltanada.alphadds.com/api";
+const BASE_URL = "http://localhost:8000/api";
+//const BASE_URL = "https://api-noeltanada.alphadds.com/api";
 
 async function request(endpoint, { method = "GET", body, headers = {} } = {}) {
   const token = localStorage.getItem("token");

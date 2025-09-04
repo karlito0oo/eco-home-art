@@ -23,12 +23,12 @@ class Testimonial extends Model
     ];
 
     protected $appends = ['full_img_url'];
-    
+
     // Accessor for full URL
     public function getFullImgUrlAttribute()
     {
         return $this->attributes['img_url'] 
-            ? url($this->attributes['img_url']) 
+            ? url('storage/'.$this->attributes['img_url']) 
             : null;
     }
 }

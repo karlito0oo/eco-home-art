@@ -16,7 +16,7 @@ class Product extends Model {
     public function getFullImgUrlAttribute()
     {
         return $this->attributes['img_url'] 
-            ? url($this->attributes['img_url']) 
+            ? url('storage/'.$this->attributes['img_url']) 
             : null;
     }
 

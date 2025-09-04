@@ -54,8 +54,8 @@ class TestimonialController extends Controller
             if ($request->hasFile('img')) {
                 $mainImage = $request->file('img');
                 $mainImageName = time() . '_' . $mainImage->getClientOriginalName();
-                $mainImage->move(public_path('testimonials'), $mainImageName);
-                $validatedData['img_url'] = 'testimonials/' . $mainImageName;
+                $path = $mainImage->storeAs('testimonials', $mainImageName, 'public');
+                $validatedData['img_url'] = $path;
             }
 
             // If no display_order provided, append to the end
@@ -89,14 +89,14 @@ class TestimonialController extends Controller
             ]);
 
             if ($request->hasFile('img')) {
-                if ($testimonial->img_url && file_exists(public_path($testimonial->img_url))) {
-                    unlink(public_path($testimonial->img_url));
+                if ($testimonial->img_url) {
+                    \Storage::disk('public')->delete($testimonial->img_url);
                 }
 
                 $mainImage = $request->file('img');
                 $mainImageName = time() . '_' . $mainImage->getClientOriginalName();
-                $mainImage->move(public_path('testimonials'), $mainImageName);
-                $validatedData['img_url'] = 'testimonials/' . $mainImageName;
+                $path = $mainImage->storeAs('testimonials', $mainImageName, 'public');
+                $validatedData['img_url'] = $path;
             }
 
             $testimonial->update($validatedData);
@@ -110,8 +110,8 @@ class TestimonialController extends Controller
     public function destroy(Testimonial $testimonial)
     {
         try {
-            if ($testimonial->img_url && file_exists(public_path($testimonial->img_url))) {
-                unlink(public_path($testimonial->img_url));
+            if ($testimonial->img_url) {
+                \Storage::disk('public')->delete($testimonial->img_url);
             }
             
             $testimonial->delete();
