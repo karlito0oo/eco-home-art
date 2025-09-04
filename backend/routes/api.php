@@ -17,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::post('/products/featured/reorder', [ProductController::class, 'reorderFeatured']);
     
     // Protected category routes
     Route::post('/categories', [App\Http\Controllers\CategoryController::class, 'store']);

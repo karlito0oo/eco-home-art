@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Routes, Route } from "react-router-dom";
 import ProductList from "./ProductList";
 import Categories from "./Categories";
+import FeaturedProducts from "./admin/FeaturedProducts";
 
 const USER = { name: "Admin User" };
 
@@ -204,14 +205,7 @@ const AdminDashboard = () => {
               </>
             }
           />
-          <Route
-            path="/admin/featured"
-            element={
-              <div className="bg-white rounded shadow p-8">
-                Featured Products Placeholder
-              </div>
-            }
-          />
+          <Route path="featured" element={<FeaturedProducts />} />
           <Route path="products" element={<ProductList />} />
           <Route path="categories" element={<Categories />} />
           <Route

@@ -9,15 +9,77 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
+    private function ensureFeaturedOrder()
+    {
+        $featuredProducts = Product::where('is_featured', true)
+            ->whereNull('featured_order')
+            ->get();
+
+        $lastOrder = Product::where('is_featured', true)
+            ->whereNotNull('featured_order')
+            ->max('featured_order') ?? 0;
+
+        foreach ($featuredProducts as $index => $product) {
+            $product->update(['featured_order' => $lastOrder + $index + 1]);
+        }
+    }
+
+    public function reorderFeatured(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'products' => 'required|array',
+                'products.*.id' => 'required|exists:products,id',
+                'products.*.featured_order' => 'required|integer'
+            ]);
+
+            \DB::transaction(function () use ($validated) {
+                // First, update all featured products to ensure proper ordering
+                Product::where('is_featured', true)
+                    ->update(['featured_order' => null]);
+
+                // Then update with new orders
+                foreach ($validated['products'] as $item) {
+                    Product::where('id', $item['id'])->update([
+                        'featured_order' => $item['featured_order'],
+                        'is_featured' => true
+                    ]);
+                }
+            });
+
+            return response()->json(['message' => 'Products reordered successfully']);
+        } catch (\Exception $e) {
+            Log::error("Error reordering products: " . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function index(Request $request)
     {
         $perPage = $request->get("per_page", 10);
-        $search = $request->get("search", null);
+        $search = $request->get("search", "");
+        $exclude = $request->get("exclude") ? explode(",", $request->get("exclude")) : [];
 
         $query = Product::query()->with(["category", "images"]);
 
+        // Handle featured products
+        if ($request->has("featured")) {
+            $query->where("is_featured", true)
+                  ->orderBy("featured_order", "asc");
+            // Make sure all featured products have an order
+            $this->ensureFeaturedOrder();
+        }
+
+        // Handle category filter
         if ($request->has("category_id") && !empty($request->category_id)) {
             $query->where("category_id", $request->category_id);
+        }
+
+        // Handle search
+        // Handle exclude IDs
+        if ($request->has("exclude")) {
+            $excludeIds = explode(",", $request->get("exclude"));
+            $query->whereNotIn("id", $excludeIds);
         }
 
         if (!empty($search)) {
@@ -89,14 +151,28 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
 
             $validatedData = $request->validate([
-                "name" => "required|string|max:255",
-                "category_id" => "required|exists:categories,id",
+                "name" => "nullable|string|max:255",
+                "category_id" => "nullable|exists:categories,id",
                 "dimensions" => "nullable|string",
                 "description" => "nullable|string",
-                "is_featured" => "boolean",
+                "is_featured" => "nullable|boolean",
+                "featured_order" => "nullable|integer",
                 "img" => "nullable|image|mimes:jpeg,png,jpg,gif|max:2048",
-                "additional_images.*" => "image|mimes:jpeg,png,jpg,gif|max:2048"
+                "additional_images.*" => "nullable|image|mimes:jpeg,png,jpg,gif|max:2048"
             ]);
+
+            // Handle featured status change
+            if (isset($validatedData['is_featured'])) {
+                if ($validatedData['is_featured']) {
+                    // If making featured and no order specified, put at the end
+                    if (!isset($validatedData['featured_order'])) {
+                        $validatedData['featured_order'] = Product::where('is_featured', true)->max('featured_order') + 1;
+                    }
+                } else {
+                    // If removing from featured, clear the order
+                    $validatedData['featured_order'] = null;
+                }
+            }
 
             if ($request->hasFile("img")) {
                 if ($product->img_url && file_exists(public_path($product->img_url))) {

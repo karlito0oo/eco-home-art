@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model {
     use HasFactory;
     protected $fillable = [
-        'name', 'category_id', 'dimensions', 'description', 'img_url', 'is_featured'
+        'name', 'category_id', 'dimensions', 'description', 'img_url', 'is_featured', 'featured_order'
     ];
     
     // This ensures it's always included in JSON
