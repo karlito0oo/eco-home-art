@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
-import { PRODUCT_LIST } from "../../constants";
+import api from "../services/api";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -10,39 +10,58 @@ import "swiper/css/pagination";
 const ProductDetails = () => {
   const { id, slug } = useParams();
   const navigate = useNavigate();
-
-  // Find product by ID
-  const product = PRODUCT_LIST.find((p) => p.id === parseInt(id));
+  const [product, setProduct] = useState(null);
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!product) {
-      navigate("/products");
-      return;
-    }
+    const fetchProduct = async () => {
+      try {
+        const response = await api.get(`/products/${id}`);
+        const productData = response;
+        setProduct(productData);
 
-    // Update URL if slug doesn't match product name
-    const correctSlug = product.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-    if (slug !== correctSlug) {
-      navigate(`/products/${id}/${correctSlug}`, { replace: true });
-    }
-  }, [id, slug, product, navigate]);
+        // Update URL if slug doesn't match product name
+        const correctSlug = productData.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+        if (slug !== correctSlug) {
+          navigate(`/products/${id}/${correctSlug}`, { replace: true });
+        }
+
+        // Fetch similar products
+        const similarResponse = await api.get(
+          `/products?category_id=${productData.category_id}&exclude=${id}`
+        );
+        setSimilarProducts(similarResponse.data || []);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        navigate("/products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id, slug, navigate]);
 
   const handleInquiry = () => {
     navigate(`/contact?product=${encodeURIComponent(product.name)}`);
   };
 
-  // Get all products in the same category (excluding current product)
-  const similarProducts = PRODUCT_LIST.filter(
-    (p) => p.categories === product?.categories && p.id !== product?.id
-  );
-
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (categoryName) => {
     // Navigate to products page with category as URL parameter
-    navigate(`/products?category=${encodeURIComponent(category)}`);
+    navigate(`/products?category=${encodeURIComponent(categoryName)}`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-800 border-t-transparent"></div>
+      </div>
+    );
+  }
 
   if (!product) {
     return null;
@@ -60,10 +79,10 @@ const ProductDetails = () => {
         </button>
         <span className="text-gray-500">/</span>
         <button
-          onClick={() => handleCategoryClick(product.categories)}
+          onClick={() => handleCategoryClick(product.category?.name)}
           className="text-green-800 hover:text-green-700 font-medium"
         >
-          {product.categories}
+          {product.category?.name}
         </button>
         <span className="text-gray-500">/</span>
         <span className="text-gray-600 truncate">{product.name}</span>
@@ -99,7 +118,7 @@ const ProductDetails = () => {
               {product.name}
             </h2>
             <div className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 font-semibold text-base mb-4 shadow">
-              {product.categories}
+              {product.category?.name}
             </div>
             <div className="prose max-w-none text-lg text-gray-700 mb-6">
               <p className="whitespace-pre-line">{product.description}</p>
@@ -126,7 +145,7 @@ const ProductDetails = () => {
       {similarProducts.length > 0 && (
         <div className="mt-20">
           <h3 className="text-2xl font-extrabold mb-8 text-green-900 tracking-wide">
-            More {product.categories}
+            More {product.category?.name}
           </h3>
           <div className="px-2 py-4">
             <Swiper
@@ -169,7 +188,7 @@ const ProductDetails = () => {
                         {item.name}
                       </h4>
                       <p className="text-green-700 font-medium">
-                        {item.categories}
+                        {item.category?.name}
                       </p>
                     </div>
                   </div>
