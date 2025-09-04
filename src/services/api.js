@@ -1,7 +1,8 @@
-const BASE_URL = "http://localhost:8000/api";
+//const BASE_URL = "http://localhost:8000/api";
+const BASE_URL = "https://api-noeltanada.alphadds.com/api";
 
 async function request(endpoint, { method = "GET", body, headers = {} } = {}) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const options = {
     method,
     headers: {
@@ -9,7 +10,7 @@ async function request(endpoint, { method = "GET", body, headers = {} } = {}) {
       ...headers,
     },
   };
-  
+
   if (body) {
     if (body instanceof FormData) {
       // Don't set Content-Type for FormData, let the browser handle it
@@ -29,9 +30,12 @@ async function request(endpoint, { method = "GET", body, headers = {} } = {}) {
 
 export const api = {
   get: (endpoint, options) => request(endpoint, { ...options, method: "GET" }),
-  post: (endpoint, body, options) => request(endpoint, { ...options, method: "POST", body }),
-  put: (endpoint, body, options) => request(endpoint, { ...options, method: "PUT", body }),
-  delete: (endpoint, options) => request(endpoint, { ...options, method: "DELETE" }),
+  post: (endpoint, body, options) =>
+    request(endpoint, { ...options, method: "POST", body }),
+  put: (endpoint, body, options) =>
+    request(endpoint, { ...options, method: "PUT", body }),
+  delete: (endpoint, options) =>
+    request(endpoint, { ...options, method: "DELETE" }),
 };
 
 export default api;
