@@ -73,7 +73,6 @@ const Sidebar = () => {
             </button>
           </div>
         </div>
-
         <button
           className="flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-800 transition text-lg font-medium"
           onClick={() => {
@@ -82,6 +81,15 @@ const Sidebar = () => {
           }}
         >
           Articles
+        </button>{" "}
+        <button
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-800 transition text-lg font-medium"
+          onClick={() => {
+            navigate("/admin/testimonials");
+            setProductsOpen(false);
+          }}
+        >
+          Testimonials
         </button>
         <button
           className="flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-800 transition text-lg font-medium"
@@ -130,6 +138,7 @@ const UserDropdown = ({ open, onClose, onLogout }) =>
 
 // Import Articles Management component
 import ArticlesManagement from "./admin/articles/ArticlesManagement";
+import TestimonialsManagement from "./admin/testimonials/TestimonialsManagement";
 
 const AdminDashboard = () => {
   const [userDropdown, setUserDropdown] = useState(false);
@@ -223,6 +232,7 @@ const AdminDashboard = () => {
           <Route path="products" element={<ProductList />} />
           <Route path="categories" element={<Categories />} />
           <Route path="articles" element={<ArticlesManagement />} />
+          <Route path="testimonials" element={<TestimonialsManagement />} />
           <Route
             path="/admin/cms"
             element={

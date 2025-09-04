@@ -70,7 +70,7 @@ export default function ArticleDetails() {
         <>
           {article.img_url && (
             <img
-              src={article.img_url}
+              src={article.full_img_url}
               alt={article.title}
               className="w-full h-64 object-cover rounded-lg mb-6"
             />

@@ -1,29 +1,35 @@
 import { useState, useEffect } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import api from "../../../services/api";
 import Table from "../../../components/Table";
 import LoadingOverlay from "../../../components/LoadingOverlay";
 
-export default function ArticlesManagement() {
+export default function TestimonialsManagement() {
   const [loading, setLoading] = useState(true);
-  const [articles, setArticles] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [selectedTestimonial, setSelectedTestimonial] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const perPage = 100;
 
   // Columns for the table
   const columns = [
     {
-      key: "title",
-      label: "Title",
-      style: { minWidth: "200px" },
+      key: "name",
+      label: "Name",
+      style: { minWidth: "150px" },
     },
     {
-      key: "description",
-      label: "Description",
+      key: "position",
+      label: "Position",
+      style: { minWidth: "150px" },
+    },
+    {
+      key: "content",
+      label: "Content",
       style: { minWidth: "300px" },
     },
     {
@@ -34,8 +40,8 @@ export default function ArticlesManagement() {
         <div className="w-16 h-16">
           <img
             src={value}
-            alt="Article"
-            className="w-full h-full object-cover rounded"
+            alt="Testimonial"
+            className="w-full h-full object-cover rounded-full"
           />
         </div>
       ),
@@ -58,16 +64,16 @@ export default function ArticlesManagement() {
       key: "actions",
       label: "Actions",
       style: { width: "150px" },
-      render: (_, article) => (
+      render: (_, testimonial) => (
         <div className="flex gap-2">
           <button
-            onClick={() => handleEdit(article)}
+            onClick={() => handleEdit(testimonial)}
             className="p-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
           >
             Edit
           </button>
           <button
-            onClick={() => handleDelete(article)}
+            onClick={() => handleDelete(testimonial)}
             className="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
           >
             Delete
@@ -87,41 +93,42 @@ export default function ArticlesManagement() {
 
   // Fetch when page or debouncedSearch changes
   useEffect(() => {
-    fetchArticles();
+    fetchTestimonials();
   }, [page, debouncedSearch]);
 
-  const fetchArticles = async () => {
+  const fetchTestimonials = async () => {
     try {
       setLoading(true);
       const response = await api.get(
-        `/articles?page=${page}&search=${encodeURIComponent(
+        `/testimonials?page=${page}&search=${encodeURIComponent(
           debouncedSearch
         )}&per_page=${perPage}`
       );
-      setArticles(response.data);
+
+      setTestimonials(response.data);
       setTotalPages(Math.ceil(response.total / perPage));
     } catch (error) {
-      console.error("Error fetching articles:", error);
+      console.error("Error fetching testimonials:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (article) => {
-    setSelectedArticle(article);
+  const handleEdit = (testimonial) => {
+    setSelectedTestimonial(testimonial);
     setShowModal(true);
   };
 
-  const handleDelete = async (article) => {
-    if (!confirm("Are you sure you want to delete this article?")) return;
+  const handleDelete = async (testimonial) => {
+    if (!confirm("Are you sure you want to delete this testimonial?")) return;
 
     try {
       setLoading(true);
-      await api.delete(`/articles/${article.id}`);
-      await fetchArticles();
+      await api.delete(`/testimonials/${testimonial.id}`);
+      await fetchTestimonials();
     } catch (error) {
-      console.error("Error deleting article:", error);
-      alert("Failed to delete article. Please try again.");
+      console.error("Error deleting testimonial:", error);
+      alert("Failed to delete testimonial. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -130,27 +137,55 @@ export default function ArticlesManagement() {
   const handleSubmit = async (formData) => {
     try {
       setLoading(true);
-      if (selectedArticle) {
+      if (selectedTestimonial) {
         formData.append("_method", "PUT");
-        await api.post(`/articles/${selectedArticle.id}`, formData);
+        await api.post(`/testimonials/${selectedTestimonial.id}`, formData);
       } else {
-        await api.post("/articles", formData);
+        await api.post("/testimonials", formData);
       }
-      await fetchArticles();
+      await fetchTestimonials();
       setShowModal(false);
-      setSelectedArticle(null);
+      setSelectedTestimonial(null);
     } catch (error) {
-      console.error("Error saving article:", error);
-      alert("Failed to save article. Please try again.");
+      console.error("Error saving testimonial:", error);
+      alert("Failed to save testimonial. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const items = Array.from(testimonials);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    const updatedItems = items.map((item, index) => ({
+      ...item,
+      display_order: index + 1,
+    }));
+
+    setTestimonials(updatedItems);
+
+    try {
+      await api.post("/testimonials/reorder", {
+        testimonials: updatedItems.map((item, index) => ({
+          id: item.id,
+          display_order: index + 1,
+        })),
+      });
+    } catch (error) {
+      console.error("Error updating display order:", error);
+      alert("Failed to update order. Please try again.");
+      await fetchTestimonials(); // Refresh the list on error
     }
   };
 
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Articles Management</h1>
+        <h1 className="text-2xl font-bold">Testimonials Management</h1>
         <div className="flex gap-2 items-center">
           <input
             type="text"
@@ -159,33 +194,53 @@ export default function ArticlesManagement() {
               setPage(1);
               setSearch(e.target.value);
             }}
-            placeholder="Search articles..."
+            placeholder="Search testimonials..."
             className="px-3 py-2 border rounded"
             style={{ minWidth: 200 }}
           />
           <button
             className="bg-green-600 text-white px-4 py-2 rounded shadow"
             onClick={() => {
-              setSelectedArticle(null);
+              setSelectedTestimonial(null);
               setShowModal(true);
             }}
           >
-            Add Article
+            Add Testimonial
           </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow">
         {loading && <LoadingOverlay />}
-        <div className="p-4">
-          <Table
-            columns={columns}
-            data={articles}
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="testimonials">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="p-4"
+              >
+                <Table
+                  columns={columns}
+                  data={testimonials}
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  dragHandleProps={(index) => ({
+                    ...provided.droppableProps,
+                    draggableProps: {
+                      ...Draggable.getDraggableProps({
+                        draggableId: `testimonial-${testimonials[index]?.id}`,
+                        index,
+                      }),
+                    },
+                  })}
+                />
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
 
       {/* Add/Edit Modal */}
@@ -194,12 +249,12 @@ export default function ArticlesManagement() {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
-                {selectedArticle ? "Edit Article" : "Add Article"}
+                {selectedTestimonial ? "Edit Testimonial" : "Add Testimonial"}
               </h2>
               <button
                 onClick={() => {
                   setShowModal(false);
-                  setSelectedArticle(null);
+                  setSelectedTestimonial(null);
                 }}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -218,12 +273,12 @@ export default function ArticlesManagement() {
                 </svg>
               </button>
             </div>
-            <ArticleForm
-              article={selectedArticle}
+            <TestimonialForm
+              testimonial={selectedTestimonial}
               onSubmit={handleSubmit}
               onCancel={() => {
                 setShowModal(false);
-                setSelectedArticle(null);
+                setSelectedTestimonial(null);
               }}
             />
           </div>
@@ -233,8 +288,10 @@ export default function ArticlesManagement() {
   );
 }
 
-function ArticleForm({ article, onSubmit, onCancel }) {
-  const [imagePreview, setImagePreview] = useState(article?.img_url || null);
+function TestimonialForm({ testimonial, onSubmit, onCancel }) {
+  const [imagePreview, setImagePreview] = useState(
+    testimonial?.img_url || null
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -251,20 +308,19 @@ function ArticleForm({ article, onSubmit, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <input
         type="text"
-        name="title"
-        placeholder="Title"
+        name="name"
+        placeholder="Name"
         className="w-full px-3 py-2 border rounded"
         required
-        defaultValue={article?.title || ""}
+        defaultValue={testimonial?.name || ""}
       />
 
-      <textarea
-        name="description"
-        placeholder="Description"
+      <input
+        type="text"
+        name="position"
+        placeholder="Position"
         className="w-full px-3 py-2 border rounded"
-        required
-        rows={3}
-        defaultValue={article?.description || ""}
+        defaultValue={testimonial?.position || ""}
       />
 
       <textarea
@@ -272,20 +328,20 @@ function ArticleForm({ article, onSubmit, onCancel }) {
         placeholder="Content"
         className="w-full px-3 py-2 border rounded"
         required
-        rows={5}
-        defaultValue={article?.content || ""}
+        rows={4}
+        defaultValue={testimonial?.content || ""}
       />
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Image
+          Photo
         </label>
         <div className="flex items-center gap-4">
           {imagePreview && (
             <img
               src={imagePreview}
               alt="Preview"
-              className="h-20 w-20 object-cover rounded"
+              className="h-20 w-20 object-cover rounded-full"
             />
           )}
           <input
@@ -299,7 +355,7 @@ function ArticleForm({ article, onSubmit, onCancel }) {
               }
             }}
             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-            required={!article}
+            required={!testimonial}
           />
         </div>
       </div>
@@ -308,9 +364,9 @@ function ArticleForm({ article, onSubmit, onCancel }) {
         <input
           type="checkbox"
           name="is_active"
-          defaultChecked={article?.is_active ?? true}
-          value="1"
+          defaultChecked={testimonial?.is_active ?? true}
           className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          value={1}
         />
         <label className="ml-2 block text-sm text-gray-900">Active</label>
       </div>
