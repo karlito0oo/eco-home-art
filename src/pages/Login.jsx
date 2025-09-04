@@ -12,9 +12,19 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      await api.post("/login", { email, password });
-      navigate("/admin");
+      const response = await api.post("/login", { email, password });
+      console.log('Login response:', response); // For debugging
+      if (response && response.token) {
+        localStorage.setItem('token', response.token);
+        // Optionally store user data
+        localStorage.setItem('user', JSON.stringify(response.user));
+        navigate("/admin");
+      } else {
+        console.error('Login response missing token:', response);
+        throw new Error("Authentication failed - no token received");
+      }
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.message || "Login failed");
     }
   };

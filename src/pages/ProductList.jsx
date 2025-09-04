@@ -114,7 +114,7 @@ const ProductList = () => {
                 <td className="px-4 py-2">{product.description}</td>
                 <td className="px-4 py-2">
                   <img
-                    src={`/${product.img_url}`}
+                    src={product.full_img_url}
                     alt={product.name}
                     className="h-12 w-12 object-cover rounded"
                   />
@@ -172,14 +172,32 @@ const ProductList = () => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
 
-                if (editProduct) {
-                  await api.put(`/products/${editProduct.id}`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                  });
-                } else {
-                  await api.post("/products", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                  });
+                // Log form data for debugging
+                console.log("Form Data Contents:");
+                for (let pair of formData.entries()) {
+                  console.log(pair[0], pair[1]);
+                }
+
+                try {
+                  if (editProduct) {
+                    // For update, we need to explicitly set _method to PUT for Laravel
+                    formData.append("_method", "PUT");
+                    const response = await api.post(
+                      `/products/${editProduct.id}`,
+                      formData
+                    );
+                    console.log("Update response:", response);
+                  } else {
+                    const response = await api.post("/products", formData);
+                    console.log("Create response:", response);
+                  }
+                } catch (error) {
+                  console.error("Error saving product:", error);
+                  alert(
+                    "Error saving product: " +
+                      (error.message || "Unknown error")
+                  );
+                  return;
                 }
 
                 setShowModal(false);
@@ -224,6 +242,7 @@ const ProductList = () => {
                   type="checkbox"
                   name="is_featured"
                   defaultChecked={!!editProduct?.is_featured}
+                  value="1"
                 />
                 <span>Featured</span>
               </label>

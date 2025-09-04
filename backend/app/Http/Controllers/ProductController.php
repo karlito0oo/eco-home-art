@@ -26,16 +26,59 @@ class ProductController extends Controller {
         return response()->json($products);
     }
     public function store(Request $request) {
-        $product = Product::create($request->all());
-        return response()->json($product, 201);
+        \Log::info('Store Request Data:', [
+            'all' => $request->all(),
+            'files' => $request->allFiles(),
+            'headers' => $request->header()
+        ]);
+        
+        try {
+            $data = $request->all();
+            
+            if ($request->hasFile('img')) {
+                $file = $request->file('img');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('products'), $filename);
+                $data['img_url'] = 'products/' . $filename;
+            }
+
+            $product = Product::create($data);
+            return response()->json($product, 201);
+        } catch (\Exception $e) {
+            \Log::error('Error creating product: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+
     public function show($id) {
         return response()->json(Product::findOrFail($id));
     }
+
     public function update(Request $request, $id) {
-        $product = Product::findOrFail($id);
-        $product->update($request->all());
-        return response()->json($product);
+        \Log::info('Update Request Data:', [
+            'id' => $id,
+            'all' => $request->all(),
+            'files' => $request->allFiles(),
+            'headers' => $request->header()
+        ]);
+        
+        try {
+            $product = Product::findOrFail($id);
+            $data = $request->all();
+
+            if ($request->hasFile('img')) {
+                $file = $request->file('img');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('products'), $filename);
+                $data['img_url'] = 'products/' . $filename;
+            }
+
+            $product->update($data);
+            return response()->json($product);
+        } catch (\Exception $e) {
+            \Log::error('Error updating product: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
     public function destroy($id) {
         Product::destroy($id);

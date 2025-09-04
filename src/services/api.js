@@ -1,15 +1,23 @@
 const BASE_URL = "http://localhost:8000/api";
 
 async function request(endpoint, { method = "GET", body, headers = {} } = {}) {
+  const token = localStorage.getItem('token');
   const options = {
     method,
     headers: {
-      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
       ...headers,
     },
   };
+  
   if (body) {
-    options.body = JSON.stringify(body);
+    if (body instanceof FormData) {
+      // Don't set Content-Type for FormData, let the browser handle it
+      options.body = body;
+    } else {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(body);
+    }
   }
   const res = await fetch(`${BASE_URL}${endpoint}`, options);
   const data = await res.json();

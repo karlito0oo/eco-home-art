@@ -16,8 +16,12 @@ class AuthController extends Controller
 
         $user = \App\Models\User::where('email', $request->email)->first();
         if ($user && \Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
-            // For demo, just return success
-            return response()->json(['message' => 'Login successful'], 200);
+            $token = $user->createToken('auth-token')->plainTextToken;
+            return response()->json([
+                'message' => 'Login successful',
+                'token' => $token,
+                'user' => $user
+            ], 200);
         }
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
