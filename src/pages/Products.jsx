@@ -1,48 +1,102 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { PRODUCT_LIST, CATEGORY_LIST } from "../../constants";
-
-// Add 'ALL' to the categories list
-const categories = ["ALL", ...CATEGORY_LIST];
+import Pagination from "../components/Pagination";
+import api from "../services/api";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState(
-    searchParams.get("category")?.toUpperCase() || "ALL"
-  );
-  const [filteredProducts, setFilteredProducts] = useState(PRODUCT_LIST);
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page")) || 1
+  );
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Update selected category when URL parameter changes
+  // Fetch categories and initialize state based on URL
   useEffect(() => {
-    const categoryParam = searchParams.get("category")?.toUpperCase();
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    } else {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get("/categories");
+        const allCategories = [{ id: "ALL", name: "ALL" }, ...(response || [])];
+        setCategories(allCategories);
+
+        // Handle initial category from URL
+        const categoryParam = searchParams.get("category");
+        if (categoryParam) {
+          const matchedCategory = response.data.find(
+            (cat) => cat.name.toUpperCase() === categoryParam.toUpperCase()
+          );
+          if (matchedCategory) {
+            setSelectedCategory(matchedCategory.id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Update selected category when URL changes
+  useEffect(() => {
+    console.log("Categories:", categories);
+    const categoryParam = searchParams.get("category");
+    if (!categoryParam) {
       setSelectedCategory("ALL");
+    } else {
+      const matchedCategory = categories.find(
+        (cat) => cat.name.toUpperCase() === categoryParam.toUpperCase()
+      );
+      console.log("Matched Category:", matchedCategory);
+      if (matchedCategory) {
+        setSelectedCategory(matchedCategory.id);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, categories]);
 
   useEffect(() => {
-    if (selectedCategory === "ALL") {
-      setFilteredProducts(PRODUCT_LIST);
-    } else {
-      setFilteredProducts(
-        PRODUCT_LIST.filter(
-          (product) => product.categories === selectedCategory
-        )
-      );
-    }
-  }, [selectedCategory]);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const categoryId = selectedCategory !== "ALL" ? selectedCategory : "";
+        const response = await api.get(
+          `/products?category_id=${categoryId}&page=${currentPage}`
+        );
+        setProducts(response.data || []);
+        setTotalPages(response.last_page || 1);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+      setLoading(false);
+    };
+    fetchProducts();
+  }, [selectedCategory, currentPage]);
 
-  const handleCategoryChange = (category) => {
-    if (category === "ALL") {
-      // Remove category parameter if 'ALL' is selected
-      searchParams.delete("category");
+  // Update URL when page changes
+  useEffect(() => {
+    if (currentPage === 1) {
+      searchParams.delete("page");
     } else {
-      searchParams.set("category", category);
+      searchParams.set("page", currentPage.toString());
     }
+    setSearchParams(searchParams);
+  }, [currentPage]);
+
+  const handleCategoryChange = (categoryId) => {
+    setCurrentPage(1); // Reset to first page when changing category
+    setSelectedCategory(categoryId);
+
+    // Get category name for URL
+    const category = categories.find((cat) => cat.id === categoryId);
+    if (categoryId === "ALL") {
+      searchParams.delete("category");
+    } else if (category) {
+      searchParams.set("category", category.name);
+    }
+    searchParams.delete("page"); // Remove page parameter when changing category
     setSearchParams(searchParams);
   };
 
@@ -58,7 +112,7 @@ const Products = () => {
         </div>
 
         {/* Mobile Breadcrumbs */}
-        <div className="md:hidden mb-8">
+        <div className="mb-8">
           <div className="flex items-center justify-center gap-2 text-sm">
             <span className="text-gray-600">Category:</span>
             <button
@@ -72,7 +126,8 @@ const Products = () => {
                 }
               `}
             >
-              {selectedCategory}
+              {categories.find((cat) => cat.id === selectedCategory)?.name ||
+                "ALL"}
               {selectedCategory !== "ALL" && (
                 <svg
                   className="w-4 h-4"
@@ -92,35 +147,13 @@ const Products = () => {
           </div>
         </div>
 
-        {/* Categories - Hidden on mobile */}
-        {/* <div className="hidden md:block mb-12">
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                className={`
-                  px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200
-                  ${
-                    selectedCategory === category
-                      ? "bg-green-800 text-white shadow-md"
-                      : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-green-800"
-                  }
-                `}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div> */}
-
         {loading ? (
           <div className="flex h-64 items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-800 border-t-transparent"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map((product) => (
+            {products.map((product) => (
               <ProductCard
                 key={product.id}
                 id={product.id}
@@ -134,12 +167,21 @@ const Products = () => {
           </div>
         )}
 
-        {!loading && filteredProducts.length === 0 && (
+        {!loading && products.length === 0 && (
           <div className="flex h-64 items-center justify-center">
             <p className="text-lg text-gray-600">
               No products found in this category.
             </p>
           </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && products.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
     </div>

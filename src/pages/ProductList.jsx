@@ -202,7 +202,7 @@ const ProductList = () => {
               <select
                 name="category_id"
                 className="w-full mb-2 px-3 py-2 border rounded"
-                defaultValue={editProduct?.category_id || ""}
+                defaultValue={editProduct?.category?.id || editProduct?.category_id || ""}
                 required
               >
                 <option value="">Select Category</option>
@@ -224,12 +224,72 @@ const ProductList = () => {
                 className="w-full mb-2 px-3 py-2 border rounded"
                 defaultValue={editProduct?.description || ""}
               />
-              <input
-                name="img"
-                type="file"
-                accept="image/*"
-                className="w-full mb-2"
-              />
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Main Image</label>
+                <input
+                  name="img"
+                  type="file"
+                  accept="image/*"
+                  className="w-full mb-2"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        const preview = document.getElementById('mainImagePreview');
+                        if (preview) preview.src = reader.result;
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                {(editProduct?.img_url || editProduct?.full_img_url) && (
+                  <img
+                    id="mainImagePreview"
+                    src={editProduct.full_img_url || editProduct.img_url}
+                    alt="Preview"
+                    className="w-32 h-32 object-cover rounded"
+                  />
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Additional Images</label>
+                <input
+                  name="additional_images[]"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="w-full mb-2"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files);
+                    const container = document.getElementById('additionalImagesPreview');
+                    if (container) {
+                      container.innerHTML = '';
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          const img = document.createElement('img');
+                          img.src = reader.result;
+                          img.className = 'w-32 h-32 object-cover rounded mr-2 mb-2';
+                          container.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }
+                  }}
+                />
+                <div id="additionalImagesPreview" className="flex flex-wrap mt-2">
+                  {editProduct?.images?.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image.full_image_url || image.image_url}
+                      alt={`Additional ${index + 1}`}
+                      className="w-32 h-32 object-cover rounded mr-2 mb-2"
+                    />
+                  ))}
+                </div>
+              </div>
               <label className="flex items-center gap-2 mb-2">
                 <input
                   type="checkbox"
