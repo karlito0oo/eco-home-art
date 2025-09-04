@@ -5,6 +5,9 @@ use App\Http\Controllers\ProductController;
 
 Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
 
+// Contact form route
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit']);
+
 // Product routes
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import api from "../services/api";
 
 const Contact = () => {
   const [searchParams] = useSearchParams();
@@ -9,10 +10,14 @@ const Contact = () => {
     name: "",
     email: "",
     phone: "",
+    subject: productInquiry ? `Product Inquiry: ${productInquiry}` : "",
     message: productInquiry
       ? `I would like to inquire about ${productInquiry}`
       : "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,22 +27,36 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const subject = productInquiry
-      ? `Product Inquiry: ${productInquiry}`
-      : "Contact Form Submission";
+    setLoading(true);
+    setFeedback({ type: "", message: "" });
 
-    const body = `
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone}
-Message: ${formData.message}
-    `.trim();
-
-    window.location.href = `mailto:info.alphaddsi@gmail.com?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
+    try {
+      const response = await api.post("/contact", formData);
+      setFeedback({
+        type: "success",
+        message: response.message,
+      });
+      // Clear form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      console.log({ error });
+      setFeedback({
+        type: "error",
+        message:
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -264,11 +283,28 @@ Message: ${formData.message}
                 />
               </div>
 
+              {feedback.message && (
+                <div
+                  className={`mb-4 p-4 rounded-lg ${
+                    feedback.type === "success"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {feedback.message}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-green-800 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition-colors text-lg font-medium"
+                disabled={loading}
+                className={`w-full bg-green-800 text-white py-4 px-6 rounded-lg transition-colors text-lg font-medium ${
+                  loading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-green-700"
+                }`}
               >
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>

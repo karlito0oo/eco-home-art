@@ -18,6 +18,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Inquiry Send Address
+    |--------------------------------------------------------------------------
+    |
+    | This is the email address where contact form submissions will be sent.
+    |
+    */
+
+    'inquiry_send_address' => env('MAIL_INQUIRY_SEND_ADDRESS', 'info.alphaddsi@gmail.com'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mailer Configurations
     |--------------------------------------------------------------------------
     |
