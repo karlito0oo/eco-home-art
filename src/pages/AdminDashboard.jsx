@@ -7,8 +7,9 @@ import FeaturedProducts from "./admin/FeaturedProducts";
 const USER = { name: "Admin User" };
 
 const Sidebar = () => {
-  const navigate = useNavigate();
   const [productsOpen, setProductsOpen] = useState(false);
+  const [articlesOpen, setArticlesOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <aside className="fixed top-0 left-0 h-full w-56 bg-gray-900 text-white flex flex-col pt-8 shadow-lg z-50">
       <div className="text-2xl font-bold px-6 mb-10">EcoHomeArt</div>
@@ -72,6 +73,16 @@ const Sidebar = () => {
             </button>
           </div>
         </div>
+
+        <button
+          className="flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-800 transition text-lg font-medium"
+          onClick={() => {
+            navigate("/admin/articles");
+            setProductsOpen(false);
+          }}
+        >
+          Articles
+        </button>
         <button
           className="flex items-center gap-3 px-4 py-2 rounded hover:bg-gray-800 transition text-lg font-medium"
           onClick={() => {
@@ -116,6 +127,9 @@ const UserDropdown = ({ open, onClose, onLogout }) =>
       </button>
     </div>
   ) : null;
+
+// Import Articles Management component
+import ArticlesManagement from "./admin/articles/ArticlesManagement";
 
 const AdminDashboard = () => {
   const [userDropdown, setUserDropdown] = useState(false);
@@ -208,6 +222,7 @@ const AdminDashboard = () => {
           <Route path="featured" element={<FeaturedProducts />} />
           <Route path="products" element={<ProductList />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="articles" element={<ArticlesManagement />} />
           <Route
             path="/admin/cms"
             element={
