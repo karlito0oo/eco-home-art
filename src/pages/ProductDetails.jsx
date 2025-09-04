@@ -99,6 +99,7 @@ const ProductDetails = () => {
             pagination={{ clickable: true }}
             className="w-full rounded-xl overflow-hidden shadow-lg"
           >
+            {/* Main product image first */}
             <SwiperSlide>
               <div className="aspect-square w-full bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
                 <img
@@ -108,6 +109,19 @@ const ProductDetails = () => {
                 />
               </div>
             </SwiperSlide>
+            
+            {/* Additional product images */}
+            {product.images?.map((image, index) => (
+              <SwiperSlide key={image.id || index}>
+                <div className="aspect-square w-full bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
+                  <img
+                    src={image.full_image_url}
+                    alt={`${product.name} - Image ${index + 2}`}
+                    className="w-4/5 h-4/5 object-contain rounded-xl shadow-lg transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
           </Swiper>
         </div>
 
