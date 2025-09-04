@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import Table from "../components/Table";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
@@ -36,10 +38,24 @@ const ProductList = () => {
       .catch(() => setLoading(false));
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get("/categories");
+      setCategories(response || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
   // ✅ Fetch when page or debouncedSearch changes
   useEffect(() => {
     fetchProducts();
   }, [page, debouncedSearch]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -81,63 +97,33 @@ const ProductList = () => {
         </div>
       </div>
 
-      <table className="min-w-full bg-white rounded shadow">
-        <thead>
-          <tr>
-            <th className="px-4 py-2">Name</th>
-            <th className="px-4 py-2">Category</th>
-            <th className="px-4 py-2">Dimensions</th>
-            <th className="px-4 py-2">Description</th>
-            <th className="px-4 py-2">Image</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan={6} className="text-center py-8 text-gray-500">
-                Loading...
-              </td>
-            </tr>
-          ) : products.length === 0 ? (
-            <tr>
-              <td colSpan={6} className="text-center py-8 text-gray-500">
-                No products found.
-              </td>
-            </tr>
-          ) : (
-            products.map((product) => (
-              <tr key={product.id} className="border-t">
-                <td className="px-4 py-2">{product.name}</td>
-                <td className="px-4 py-2">{product.categories}</td>
-                <td className="px-4 py-2">{product.dimensions}</td>
-                <td className="px-4 py-2">{product.description}</td>
-                <td className="px-4 py-2">
-                  <img
-                    src={product.full_img_url}
-                    alt={product.name}
-                    className="h-12 w-12 object-cover rounded"
-                  />
-                </td>
-                <td className="px-4 py-2">
-                  <button
-                    className="text-blue-600 mr-2"
-                    onClick={() => handleEdit(product)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="text-red-600"
-                    onClick={() => handleDelete(product.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+      <Table
+        columns={[
+          { key: "name", label: "Name" },
+          {
+            key: "category",
+            label: "Category",
+            render: (_, product) => product.category?.name || "-",
+          },
+          { key: "dimensions", label: "Dimensions" },
+          { key: "description", label: "Description" },
+          {
+            key: "img_url",
+            label: "Image",
+            render: (_, product) => (
+              <img
+                src={product.full_img_url}
+                alt={product.name}
+                className="h-12 w-12 object-cover rounded"
+              />
+            ),
+          },
+        ]}
+        data={products}
+        loading={loading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
       {/* Pagination */}
       <div className="flex justify-center items-center mt-6 gap-2">
@@ -213,12 +199,19 @@ const ProductList = () => {
                 required
                 defaultValue={editProduct?.name || ""}
               />
-              <input
-                name="categories"
-                placeholder="Category"
+              <select
+                name="category_id"
                 className="w-full mb-2 px-3 py-2 border rounded"
-                defaultValue={editProduct?.categories || ""}
-              />
+                defaultValue={editProduct?.category_id || ""}
+                required
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
               <input
                 name="dimensions"
                 placeholder="Dimensions"

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model {
     use HasFactory;
     protected $fillable = [
-        'name', 'categories', 'dimensions', 'description', 'img_url', 'is_featured'
+        'name', 'category_id', 'dimensions', 'description', 'img_url', 'is_featured'
     ];
     
     // This ensures it's always included in JSON
@@ -18,5 +18,13 @@ class Product extends Model {
         return $this->attributes['img_url'] 
             ? url($this->attributes['img_url']) 
             : null;
+    }
+
+    /**
+     * Get the category that owns the product.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

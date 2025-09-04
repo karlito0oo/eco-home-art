@@ -17,7 +17,7 @@ const Products = () => {
   // Update selected category when URL parameter changes
   useEffect(() => {
     const categoryParam = searchParams.get("category")?.toUpperCase();
-    if (categoryParam && categories.includes(categoryParam)) {
+    if (categoryParam) {
       setSelectedCategory(categoryParam);
     } else {
       setSelectedCategory("ALL");
